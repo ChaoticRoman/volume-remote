@@ -211,7 +211,8 @@ On your phone (same Wi‑Fi), open:
 
 **Note:** This one AI got wrong, root systemd cannot access pulse audio, but this helped:
 
-https://stackoverflow.com/a/27091782/12118546
+* https://stackoverflow.com/a/27091782/12118546
+* https://unix.stackexchange.com/a/598055/495824
 
 So I have fixed the section below.
 
