@@ -213,6 +213,8 @@ On your phone (same Wi‑Fi), open:
 
 https://stackoverflow.com/a/27091782/12118546
 
+So I have fixed the section below.
+
 Create `~/.config/systemd/user/volume-remote.service` with:
 ```
 [Unit]
@@ -228,11 +230,11 @@ ExecStart=/home/YOUR_USERNAME/volremote/venv/bin/gunicorn -w 1 -b 0.0.0.0:5000 s
 Restart=on-failure
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
 ```
 Then:
 - `systemctl --user daemon-reload`
-- `sudo systemctl enable --user --now volremote`
+- `sudo systemctl enable --user --now volume-remote`
 
 Notes
 - pactl works for both PulseAudio and PipeWire (via PulseAudio compatibility). If pactl isn’t present, ensure pulseaudio-utils is installed.

@@ -1,0 +1,13 @@
+[Unit]
+Description=Volume Remote Web Controller
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/roman/projects/volume-remote/
+ExecStart=/home/roman/projects/volume-remote/venv/bin/gunicorn -w 1 -b 0.0.0.0:8080 server:app
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
