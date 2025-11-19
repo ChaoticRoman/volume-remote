@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Volume Remote</title>
+<style>
+:root { --bg:#111; --fg:#fff; --btn:#222; --btnActive:#333; }
+* { box-sizing: border-box; }
+html, body { height:100%; margin:0; background:var(--bg); color:var(--fg); font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;}
+.container {
+  min-height: 100%;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  display:flex; align-items:center; justify-content:center;
+}
+.stack { display:flex; flex-direction:column; align-items:center; gap:2rem; width: min(90vw, 440px);}
+button {
+  width: 100%; font-size: clamp(2rem, 8vw, 4rem);
+  padding: 1.25rem; border-radius: 18px; border: 2px solid #444;
+  background: var(--btn); color: var(--fg); touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+button:active { background: var(--btnActive); transform: scale(0.99); }
+#plus { border-color:#2e7d32; }
+#minus { border-color:#ad1457; }
+.row { display:flex; gap:1rem; width:100%; }
+.small { font-size: 1rem; padding:0.9rem; }
+.readout { font-variant-numeric: tabular-nums; opacity:0.85; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="stack">
+    <div class="readout" id="readout">--%</div>
+    <button id="plus">+</button>
+    <button id="minus">−</button>
+    <div class="row">
+      <button class="small" id="mute">Mute</button>
+      <button class="small" id="step">Step: 5%</button>
+    </div>
+  </div>
+</div>
+<script>
+const qs = new URLSearchParams(location.search);
+const TOKEN = qs.get('token') || localStorage.getItem('token') || '';
+if (TOKEN) localStorage.setItem('token', TOKEN);
+let step = parseInt(localStorage.getItem('step') || '5', 10);
+const readout = document.getElementById('readout');
+const stepBtn = document.getElementById('step');
+
+function api(method='GET', body=null) {
+  return fetch('/api/volume', {
+    method,
+    headers: Object.assign({'Content-Type':'application/json'}, TOKEN?{'X-Auth-Token':TOKEN}:{}),
+    body: body?JSON.stringify(body):undefined
+  }).then(r => r.json());
+}
+
+function refresh(){
+  api('GET').then(j=>{
+    if (j && typeof j.volume !== 'undefined') {
+      readout.textContent = j.volume + '%' + (j.muted ? ' (muted)' : '');
+    } else { readout.textContent = 'Err'; }
+  }).catch(()=> readout.textContent = 'Err');
+}
+
+document.getElementById('plus').addEventListener('click', ()=> api('POST', {action:'up', step}).then(refresh));
+document.getElementById('minus').addEventListener('click', ()=> api('POST', {action:'down', step}).then(refresh));
+document.getElementById('mute').addEventListener('click', ()=> api('POST', {action:'mute'}).then(refresh));
+stepBtn.addEventListener('click', ()=>{
+  const choices=[2,5,10,15,20];
+  step = choices[(choices.indexOf(step)+1) % choices.length];
+  localStorage.setItem('step', String(step));
+  stepBtn.textContent = 'Step: ' + step + '%';
+});
+stepBtn.textContent = 'Step: ' + step + '%';
+refresh();
+setInterval(refresh, 4000);
+</script>
+</body>
+</html>
