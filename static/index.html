@@ -31,6 +31,7 @@ button:active { background: var(--btnActive); transform: scale(0.99); }
 <body>
 <div class="container">
   <div class="stack">
+    <button id="playpause">Play / Pause</button>
     <div class="readout" id="readout">--%</div>
     <button id="plus">+</button>
     <button id="minus">−</button>
@@ -56,6 +57,14 @@ function api(method='GET', body=null) {
   }).then(r => r.json());
 }
 
+function playpause() {
+  return fetch('/api/playpause', {
+    method: "POST",
+    headers: Object.assign({'Content-Type':'application/json'}, TOKEN?{'X-Auth-Token':TOKEN}:{}),
+    body: null
+  }).then(r => r.json());
+}
+
 function refresh(){
   api('GET').then(j=>{
     if (j && typeof j.volume !== 'undefined') {
@@ -67,6 +76,7 @@ function refresh(){
 document.getElementById('plus').addEventListener('click', ()=> api('POST', {action:'up', step}).then(refresh));
 document.getElementById('minus').addEventListener('click', ()=> api('POST', {action:'down', step}).then(refresh));
 document.getElementById('mute').addEventListener('click', ()=> api('POST', {action:'mute'}).then(refresh));
+document.getElementById('playpause').addEventListener('click', ()=> playpause().then(refresh));
 stepBtn.addEventListener('click', ()=>{
   const choices=[2,5,10,15,20];
   step = choices[(choices.indexOf(step)+1) % choices.length];

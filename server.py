@@ -63,6 +63,12 @@ def volume():
 
     return jsonify(ok=True, volume=get_volume(), muted=is_muted())
 
+@app.route('/api/playpause', methods=['POST'])
+def playpause():
+    ensure_auth(request)
+    os.system("playerctl play-pause")
+    return jsonify()
+
 @app.after_request
 def add_cors(resp):
     resp.headers['Access-Control-Allow-Origin'] = '*'
