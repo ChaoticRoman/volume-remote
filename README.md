@@ -77,11 +77,17 @@ Then:
 - `sudo systemctl enable --user --now volume-remote`
 
 Notes
-- pactl works for both PulseAudio and PipeWire (via PulseAudio compatibility). If pactl isn’t present, ensure pulseaudio-utils is installed.
+- `pactl` works for both PulseAudio and PipeWire (via PulseAudio compatibility). If pactl isn’t present, ensure pulseaudio-utils is installed.
 - Security: keep this LAN‑only, use a token, and don’t expose the port to the internet unless you put it behind HTTPS and proper auth.
 
-```
-Prompt tokens: 43, Completion tokens: 5560, Total price: 0.056 USD
-```
+## Development
 
-UPDATE: Roman hand-coded Play/Pause button as well!
+New version of `index.html` is served immediately upon saving.
+
+For backend server, just restart it and check status and logs:
+
+```
+systemctl restart --user volume-remote
+systemctl status --user volume-remote
+journalctl --user -u volume-remote.service
+``` 

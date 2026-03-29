@@ -32,9 +32,12 @@ button:active { background: var(--btnActive); transform: scale(0.99); }
 <div class="container">
   <div class="stack">
     <button id="playpause">Play / Pause</button>
+    <button class="small" id="suspend">Suspend</button>
     <div class="readout" id="readout">--%</div>
-    <button id="plus">+</button>
-    <button id="minus">−</button>
+    <div class="row">
+      <button id="minus">−</button>
+      <button id="plus">+</button>
+    </div>
     <div class="row">
       <button class="small" id="mute">Mute</button>
       <button class="small" id="step">Step: 5%</button>
@@ -49,34 +52,27 @@ let step = parseInt(localStorage.getItem('step') || '5', 10);
 const readout = document.getElementById('readout');
 const stepBtn = document.getElementById('step');
 
-function api(method='GET', body=null) {
-  return fetch('/api/volume', {
+function api(path='/api/volume', method='GET', body=null) {
+  return fetch(path, {
     method,
     headers: Object.assign({'Content-Type':'application/json'}, TOKEN?{'X-Auth-Token':TOKEN}:{}),
     body: body?JSON.stringify(body):undefined
   }).then(r => r.json());
 }
 
-function playpause() {
-  return fetch('/api/playpause', {
-    method: "POST",
-    headers: Object.assign({'Content-Type':'application/json'}, TOKEN?{'X-Auth-Token':TOKEN}:{}),
-    body: null
-  }).then(r => r.json());
-}
-
 function refresh(){
-  api('GET').then(j=>{
+  api('/api/volume').then(j=>{
     if (j && typeof j.volume !== 'undefined') {
       readout.textContent = j.volume + '%' + (j.muted ? ' (muted)' : '');
     } else { readout.textContent = 'Err'; }
   }).catch(()=> readout.textContent = 'Err');
 }
 
-document.getElementById('plus').addEventListener('click', ()=> api('POST', {action:'up', step}).then(refresh));
-document.getElementById('minus').addEventListener('click', ()=> api('POST', {action:'down', step}).then(refresh));
-document.getElementById('mute').addEventListener('click', ()=> api('POST', {action:'mute'}).then(refresh));
-document.getElementById('playpause').addEventListener('click', ()=> playpause().then(refresh));
+document.getElementById('plus').addEventListener('click', ()=> api('/api/volume', 'POST', {action:'up', step}).then(refresh));
+document.getElementById('minus').addEventListener('click', ()=> api('/api/volume', 'POST', {action:'down', step}).then(refresh));
+document.getElementById('mute').addEventListener('click', ()=> api('/api/volume', 'POST', {action:'mute'}).then(refresh));
+document.getElementById('playpause').addEventListener('click', ()=> api('/api/playpause', 'POST').then(refresh));
+document.getElementById('suspend').addEventListener('click', ()=> api('/api/suspend', 'POST'));
 stepBtn.addEventListener('click', ()=>{
   const choices=[2,5,10,15,20];
   step = choices[(choices.indexOf(step)+1) % choices.length];
