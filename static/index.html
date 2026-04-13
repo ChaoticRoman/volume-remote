@@ -13,7 +13,7 @@ html, body { height:100%; margin:0; background:var(--bg); color:var(--fg); font-
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   display:flex; align-items:center; justify-content:center;
 }
-.stack { display:flex; flex-direction:column; align-items:center; gap:2rem; width: min(90vw, 440px);}
+.stack { display:flex; flex-direction:column; align-items:center; gap:1rem; width: min(90vw, 440px);}
 button {
   width: 100%; font-size: clamp(2rem, 8vw, 4rem);
   padding: 1.25rem; border-radius: 18px; border: 2px solid #444;
@@ -25,15 +25,24 @@ button:active { background: var(--btnActive); transform: scale(0.99); }
 #minus { border-color:#ad1457; }
 .row { display:flex; gap:1rem; width:100%; }
 .small { font-size: 1rem; padding:0.9rem; }
-.readout { font-variant-numeric: tabular-nums; opacity:0.85; }
+.medium { font-size: clamp(1rem, 4vw, 2rem); padding:0.9rem; }
+.readout { font-variant-numeric: tabular-nums; font-weight: bold; opacity:0.85; }
 </style>
 </head>
 <body>
 <div class="container">
   <div class="stack">
-    <button id="playpause">Play / Pause</button>
-    <button class="small" id="suspend">Suspend</button>
-    <div class="readout" id="readout">--%</div>
+    <button class="medium" id="suspend">Suspend</button>
+    <div class="row">
+      <button class="medium" id="prev">⏮</button>
+      <button class="medium" id="playpause">⏯</button>
+      <button class="medium" id="next">⏭</button>
+    </div>
+    <div class="row">
+      <button class="medium" id="seekback">◀</button>
+      <button class="medium" id="seekfwd">▶</button>
+    </div>
+    <div class="readout" id="readout">--- %</div>
     <div class="row">
       <button id="minus">−</button>
       <button id="plus">+</button>
@@ -63,7 +72,7 @@ function api(path='/api/volume', method='GET', body=null) {
 function refresh(){
   api('/api/volume').then(j=>{
     if (j && typeof j.volume !== 'undefined') {
-      readout.textContent = j.volume + '%' + (j.muted ? ' (muted)' : '');
+      readout.textContent = j.volume + ' %' + (j.muted ? ' (muted)' : '');
     } else { readout.textContent = 'Err'; }
   }).catch(()=> readout.textContent = 'Err');
 }
@@ -72,6 +81,10 @@ document.getElementById('plus').addEventListener('click', ()=> api('/api/volume'
 document.getElementById('minus').addEventListener('click', ()=> api('/api/volume', 'POST', {action:'down', step}).then(refresh));
 document.getElementById('mute').addEventListener('click', ()=> api('/api/volume', 'POST', {action:'mute'}).then(refresh));
 document.getElementById('playpause').addEventListener('click', ()=> api('/api/playpause', 'POST').then(refresh));
+document.getElementById('seekback').addEventListener('click', ()=> api('/api/seek', 'POST', {direction:'backward', seconds:10}));
+document.getElementById('seekfwd').addEventListener('click', ()=> api('/api/seek', 'POST', {direction:'forward', seconds:10}));
+document.getElementById('prev').addEventListener('click', ()=> api('/api/prevnext', 'POST', {action:'previous'}));
+document.getElementById('next').addEventListener('click', ()=> api('/api/prevnext', 'POST', {action:'next'}));
 document.getElementById('suspend').addEventListener('click', ()=> api('/api/suspend', 'POST'));
 stepBtn.addEventListener('click', ()=>{
   const choices=[2,5,10,15,20];

@@ -79,6 +79,31 @@ def playpause():
     return jsonify()
 
 
+@app.route("/api/seek", methods=["POST"])
+def seek():
+    ensure_auth(request)
+    data = request.get_json(silent=True) or {}
+    direction = data.get("direction", "forward")
+    seconds = int(data.get("seconds", 10))
+    if direction == "backward":
+        os.system(f"playerctl position {seconds}-")
+    else:
+        os.system(f"playerctl position {seconds}+")
+    return jsonify()
+
+
+@app.route("/api/prevnext", methods=["POST"])
+def prevnext():
+    ensure_auth(request)
+    data = request.get_json(silent=True) or {}
+    action = data.get("action", "next")
+    if action == "previous":
+        os.system("playerctl previous")
+    else:
+        os.system("playerctl next")
+    return jsonify()
+
+
 @app.route("/api/suspend", methods=["POST"])
 def suspend():
     ensure_auth(request)
